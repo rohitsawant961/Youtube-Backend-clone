@@ -338,82 +338,76 @@ const updateUserCoverImage=asyncHandler(async(req,res)=>{
 
 
 
-const getUserChannelProfile =asyncHandler(async(req,res)=>{
-    const {username}=req.params
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params;
+    console.log("Username of channel:", username);
 
-    if(!username?.trim()){
-        throw new ApiError(410,"Username is Required ")
+    if (!username?.trim()) {
+        throw new ApiError(410, "Username is required");
     }
 
-    const channel= await User.aggregate([
-            {
-                $match:{
-                    username:username?.toLowerCase()
-                }
-            },
-            {
-                $lookup:{
-                    from:"subscriptions",
-                    localField:"_id",
-                    foreignField:"channel",
-                    as:"subscribers"
-
-                },
-                $lookup:{
-                    from:"subscriptions",
-                    localField:"_id",
-                    foreignField:"subscriber",
-                    as:"subscribedTo"
-
-                }
-            },
-            {
-                $addFields:{
-                        subscribersCount:{
-                        $size:"$subscribers"
-                    },
-                    channelSubscribedToCount:{
-                        $size:"$subscribedTo"
-                    },
-                    isSubscribed:{
-                        $cond:{
-                        if:{$in:[req.user?._id ,"$subscribers.subscriber"]},
-                        then:true,
-                        else:false
-                        }
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: { $size: "$subscribers" },
+                channelSubscribedToCount: { $size: "$subscribedTo" },
+                isSubscribed: {
+                    $cond: {
+                        if: {
+                            $in: [
+                                new mongoose.Types.ObjectId(req.user?._id), 
+                                { $map: { input: "$subscribers", as: "s", in: "$$s.subscriber" } } 
+                            ]
+                        },
+                        then: true,
+                        else: false
                     }
-            
-                }
-            },
-            {
-                $project:{
-                    fullName:1,
-                    username:1,
-                    subscribersCount:1,
-                    channelSubscribedToCount:1,
-                    isSubscribed:1,
-                    avatar:1,
-                    coverImage:1,
-                    email:1
-
                 }
             }
+        },
+        {
+            $project: {
+                fullName: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelSubscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+    ]);
 
-    ])
-
-    if(!channel?.length){
-        throw new ApiError(404,"Channel does not found")
+    if (!channel?.length) {
+        throw new ApiError(406, "Channel not found");
     }
 
-    return res.status(200)
-    .json(
-        new ApiResponse(
-            202,channel[0],"User channel fetched Successfully"
-        )
-    
-    )
-   
-})
+    return res.status(200).json(
+        new ApiResponse(202, channel[0], "User channel fetched successfully")
+    );
+});
 
 
 
@@ -423,8 +417,9 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
         {
             $match:{
                 _id:new mongoose.Types.ObjectId(req.user._id)
-            },
-            $lookup:{
+            }
+        },
+          {  $lookup:{
                 from:"videos",
                 localField:"watchHistory",
                 foreignField:"_id",
@@ -458,9 +453,9 @@ const getWatchHistory=asyncHandler(async(req,res)=>{
             ]
 
             }
-
-            
         }
+            
+        
     ])
 
     res.status(200)
