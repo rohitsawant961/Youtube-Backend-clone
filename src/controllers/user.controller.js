@@ -3,7 +3,6 @@ import {User} from "../models/users.model.js"
 import {ApiError} from "../utils/ApiError.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
-import {upload} from "../middlewares/multer.middleware.js"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
@@ -56,7 +55,7 @@ const registerUser = asyncHandler(async(req, res)=>{
    }
    
    if(!avatarLocalPath){
-    throw new ApiError(400,"Avatar does not received from postman")
+    throw new ApiError(400,"Avatar does not received ")
     
    }
 

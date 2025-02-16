@@ -13,7 +13,7 @@ router.route("/c/:channelId").post(toggleSubscription)
 
 router.route("/u/:channelId").get(getUserChannelSubscribers)
 
-router.route("/c/:subscriberId").get(getSubscribedChannel)
+router.route("/c/:subscribedId").get(getSubscribedChannel)
 
 
 export default router

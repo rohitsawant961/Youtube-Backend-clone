@@ -21,12 +21,15 @@ const toggleSubscription=asyncHandler(async(req,res)=>{
         subscriber:subscribeId,
         channel:channelId
     })
+
+  
+    
     if(existingSubscription){
         await Subscription.findByIdAndDelete(existingSubscription._id)
 
-        return res.status(206)
+        return res.status(200)
         .json(
-            new ApiResponse(206,{},"Channel Unsubscribed Successfully")
+            new ApiResponse(200,{},"Channel Unsubscribed Successfully")
         )
       }
       
@@ -41,9 +44,9 @@ const toggleSubscription=asyncHandler(async(req,res)=>{
     if(!addSubscription){
         throw new ApiError(403,"Cannot subscribe this channel")
     }
-    return res.status(208)
+    return res.status(200)
     .json(
-        new ApiResponse(206,addSubscription,"Subscribed Successfully")
+        new ApiResponse(200,addSubscription,"Subscribed Successfully")
     )
 
 })
@@ -51,29 +54,29 @@ const toggleSubscription=asyncHandler(async(req,res)=>{
 
 
 
-const getUserChannelSubscribers=asyncHandler(async(req,res)=>{
-    const {channelId}=req.params 
+const getUserChannelSubscribers = asyncHandler(async (req, res) => {
+    const { channelId } = req.params;
 
-    console.log("Subscribers channel id ",channelId)
 
-    if(!isValidObjectId(channelId)){
-        throw new ApiError(404,"Channel Id is invalid")
+    if (!isValidObjectId(channelId)) {
+        throw new ApiError(404, "Channel ID is invalid");
     }
 
     const subscribers = await Subscription.find({ channel: channelId })
         .populate("subscriber", "_id fullName email");
 
-
-    if(!subscribers){
-        throw new ApiError(408,"Subscribers does not found ")
+    if (subscribers.length === 0) {  
+        throw new ApiError(404, "No subscribers found");
     }
 
-    return res.status(205)
-    .json(
-        new ApiResponse(209,subscribers,"Subscribers fetched successfully")
-    )
+    return res.status(200).json(
+        new ApiResponse(200, { 
+            totalSubscribers: subscribers.length, 
+            subscribers
+        }, "Subscribers fetched successfully")
+    );
+});
 
-})
 
 
 const getSubscribedChannel=asyncHandler(async(req,res)=>{
@@ -81,21 +84,21 @@ const getSubscribedChannel=asyncHandler(async(req,res)=>{
     const{subscribedId}=req.params
 
     if(!isValidObjectId(subscribedId)){
-        throw new ApiError(410,"User does not subscribed the Channels")
+        throw new ApiError(404,"User does not subscribed the Channels")
     }
 
     const subscribed=await Subscription.find({
         subscriber:subscribedId
-    }).populate("channels","_id fullName email")
+    }).populate("channel","_id fullName email")
 
-    if(!subscribed.length()===0){
-        throw new ApiError(412,"Channels does not found ")
+    if(!subscribed.length===0){
+        throw new ApiError(404,"Channels does not found ")
 
     }
 
-    return res.status(203)
+    return res.status(200)
     .json(
-        new ApiResponse(203,subscribed,"Subscribed Channels fetched successfully")
+        new ApiResponse(200,subscribed,"Subscribed Channels fetched successfully")
     )
 
 
