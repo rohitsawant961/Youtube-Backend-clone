@@ -87,7 +87,7 @@ POST {{server}}/users/register
 
 ```json
 {
-  "username": "rohitsawant25689",
+  "username": "rohitsawant",
   "email": "r21567@gmail.com",
   "password": "12345",
   "fullName": "Rohit",
@@ -106,7 +106,7 @@ POST {{server}}/users/login
 
 ```json
 {
-  "username": "rohitsawant28797",
+  "username": "rohitsawant",
   "password": "12345"
 }
 ```
